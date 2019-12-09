@@ -297,7 +297,7 @@ Resources:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       AvailabilityZones: 
-        - !Select [ 0, !GetAZs '' ]
+        - !Select [ 0, !GetAZs '' ] #TODO: Get from parameters or elsewhere??
         - !Select [ 1, !GetAZs '' ]
       VPCZoneIdentifier:
         - !Ref PublicSubnetA
