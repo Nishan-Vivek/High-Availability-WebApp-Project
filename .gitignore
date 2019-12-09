@@ -1,2 +1,6 @@
 #Ignore my misc notes/scratchpad. 
 *.notes
+
+#Ignore my testing/devlopment scripts
+validate.sh
+apply.sh
