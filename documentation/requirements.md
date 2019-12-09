@@ -4,6 +4,8 @@ Project 2 - Deploy a high-availability web app using CloudFormation
 
 ## Project Requirements
 
+Project requirements as specified by Udacity. 
+
 ### Scenario
 
 Deploy an application (Apache Web Server) and pick up code (JavaScript and HTML) from S3 Storage and deploy.
@@ -90,3 +92,43 @@ See the provided supporting code for help and more clues.
 If you want to go the extra mile, set up a bastion host to allow you to SSH into your private subnet servers. This bastion host would be on a Public Subnet with `port 22` open only to your home `IP address`, and it would need to have the private key that you use to access the other servers.
 
 Last thing: Remember to delete your **CloudFormation** stack when you're done to avoid recurring charges!
+
+### Rubric
+
+#### The Basics
+
+|Criteria   |Specifications   |   |
+|---|---|---|
+|Parameters   |The more the better, but an exaggerated number of parameters can be messy ( say, 10 or more ). 1 or 0 is definitely lacking.   |     |
+|Resources   |This is the mandatory section of the script, we are looking for a LoadBalancer, Launch Configuration, AutoScaling group a health check, security groups and a Listener and Target Group.   |   |
+|Outputs   |This is optional, but it would be nice to have a URL here with the Load Balancer DNS Name and “http” in front of it .   |   |
+|Working Test   |If the student provides a URL to verify his work is running properly, it will be a page that says “it works! Udagram, Udacity”   |   |
+
+#### Load Balancer
+
+|Criteria   |Meets Specifications   |   |
+|---|---|---|
+| Target Group  |The auto-scaling group needs to have a property that associates it with a target group. The Load Balancer will have a Listener rule associated with the same target group   |   |
+|Health Check and Listener   |Port 80 should be used in Security groups, health checks and listeners associated with the load balancer   |   |
+
+#### Auto-Scaling
+
+|  Criteria |Meets Specifications   |   |
+|---|---|---|
+|Subnets   |Students should be using PRIV-NET ( private subnets ) for their auto-scaling instances   |   |
+|Machine Specs   |The machine should have 10 GB or more of disk and should be a t3.small or better.   |   |
+|SSH Key   |There shouldn’t be a ‘keyname’ property in the launch config   |   |
+
+
+#### Bonus
+
+|Criteria   |Meets Specifications   |   |
+|---|---|---|
+|Output   |Any values in the output section are a bonus   |   |
+|Bastion Host   | Any resource of type AWS::EC2::Instance, optional, but nice to have.  |   |
+
+#### Extras
+
+- Students can deploy Windows Servers instead of Linux and use PowerShell scripts to showcase their Windows management skills.
+- Students can use AWS Parameter Store to save sensitive data, such as credentials to showcase their attention to security.
+- Students can use CloudWatch Alarms and CloudWatch custom metrics to showcase their performance and monitoring skills.
