@@ -247,6 +247,19 @@ Resources:
         - !Ref BucketAccessRole
   
         #Security Group for webappservers
+
+  WebAppServerSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub ${EnvironmentName}-WebAppServerSG
+      GroupDescription: "Allow http to client host"
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0      
+      
         #Deploy test servers
 
 
