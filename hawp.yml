@@ -207,7 +207,50 @@ Resources:
           RouteTableId: !Ref PrivateRouteTableB
           SubnetId: !Ref PrivateSubnetB
 
-#TODO: Deploy 2 test webservers in public subnets and test. 
+#TODO: Deploy 2 test webservers in public subnets and test.
+        #TODO: IAM role for webapp servers
+  BucketAccessRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: "/"
+      AssumeRolePolicyDocument:
+        Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - "ec2.amazonaws.com"
+              Action:
+                - "sts:AssumeRole"
+      Policies:
+        - 
+         PolicyName: !Sub ${EnvironmentName}-BucketAccessPolicy
+         PolicyDocument:
+           Version: "2012-10-17"
+           Statement:
+              - 
+                Effect: "Allow"
+                Action: "s3:ListBucket"
+                Resource: "arn:aws:s3:::vivek.tech.hawp"
+              - 
+                Effect: "Allow"
+                Action: 
+                  - "s3:PutObject"
+                  - "s3:GetObject"
+                  - "s3:DeleteObject"
+                Resource: "arn:aws:s3:::vivek.tech.hawp/*"
+
+  BucketAccessInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles:
+        - !Ref BucketAccessRole
+  
+        #Security Group for webappservers
+        #Deploy test servers
+
+
+
 #TODO: Deploy ELB and test
 #TODO: Move webservers to private subnets and test. 
 #TODO: Deploy autoscaling group and redirect elb. 
