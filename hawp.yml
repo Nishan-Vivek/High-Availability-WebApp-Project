@@ -207,13 +207,12 @@ Resources:
           RouteTableId: !Ref PrivateRouteTableB
           SubnetId: !Ref PrivateSubnetB
 
-#TODO: Deploy 2 test webservers in public subnets and test.
-        #TODO: IAM role for webapp servers
   BucketAccessRole:
     Type: AWS::IAM::Role
     Properties:
       Path: "/"
       AssumeRolePolicyDocument:
+        Version: "2012-10-17"
         Statement:
             - Effect: Allow
               Principal:
@@ -246,7 +245,7 @@ Resources:
       Roles:
         - !Ref BucketAccessRole
   
-        #Security Group for webappservers
+        
 
   WebAppServerSG:
     Type: AWS::EC2::SecurityGroup
@@ -258,15 +257,62 @@ Resources:
         - IpProtocol: tcp
           FromPort: 80
           ToPort: 80
-          CidrIp: 0.0.0.0/0      
-      
-        #Deploy test servers
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0       
 
+  WebAppServerLaunchConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      LaunchConfigurationName: !Sub ${EnvironmentName}-WebAppServerLaunchConfig
+      AssociatePublicIpAddress: true #for test only
+      IamInstanceProfile: !Ref BucketAccessInstanceProfile
+      ImageId: ami-06d51e91cea0dac8d      
+      InstanceMonitoring: false #5 min metrics should be good enough and is free.
+      InstanceType: t3.medium
+      KeyName:  UdacityCLI
+      SecurityGroups:
+        - !Ref WebAppServerSG
+      UserData:
+        Fn::Base64:
+           !Sub |
+              #!/bin/bash -xe
+              apt-get update -y
+              apt-get install unzip awscli -y
+              apt-get install apache2 -y
+              systemctl start apache2.service
+              cd /var/www/html
+              aws s3 cp s3://vivek.tech.hawp/site.zip .
+              unzip -o site.zip
+              UUID=$(cat /proc/sys/kernel/random/uuid)
+              echo "<p>You are on server $UUID</p>" >> index.html
+      BlockDeviceMappings:
+        - DeviceName: "/dev/sdk"
+          Ebs:
+            VolumeSize: 10
 
+  WebAppServerASG:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AvailabilityZones: 
+        - !Select [ 0, !GetAZs '' ]
+        - !Select [ 1, !GetAZs '' ]
+      VPCZoneIdentifier:
+        - !Ref PublicSubnetA
+        - !Ref PublicSubnetB
+      LaunchConfigurationName: !Ref WebAppServerLaunchConfig
+      MaxSize: 4
+      MinSize: 2
+      Tags: #TODO: Set ASG tags
+        - Key: keyname
+          Value: value
+          PropagateAtLaunch: True
 
 #TODO: Deploy ELB and test
 #TODO: Move webservers to private subnets and test. 
-#TODO: Deploy autoscaling group and redirect elb. 
+ 
 #TODO: Allow remote access to webservers via bastion host or SSM
 
 
