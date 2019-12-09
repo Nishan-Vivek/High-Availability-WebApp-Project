@@ -35,9 +35,6 @@ Parameters:
       Type: String
       Default: 10.0.3.0/24
 
-
-
-
 Resources:
   VPC:
     Type: AWS::EC2::VPC
@@ -210,6 +207,11 @@ Resources:
           RouteTableId: !Ref PrivateRouteTableB
           SubnetId: !Ref PrivateSubnetB
 
+#TODO: Deploy 2 test webservers in public subnets and test. 
+#TODO: Deploy ELB and test
+#TODO: Move webservers to private subnets and test. 
+#TODO: Deploy autoscaling group and redirect elb. 
+#TODO: Allow remote access to webservers via bastion host or SSM
 
 
   
