@@ -258,7 +258,7 @@ Resources:
           FromPort: 80
           ToPort: 80
           CidrIp: 0.0.0.0/0
-        - IpProtocol: tcp
+        - IpProtocol: tcp #TODO: Remove if using SSM or other access method in final release
           FromPort: 22
           ToPort: 22
           CidrIp: 0.0.0.0/0       
@@ -267,7 +267,7 @@ Resources:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
       LaunchConfigurationName: !Sub ${EnvironmentName}-WebAppServerLaunchConfig
-      AssociatePublicIpAddress: true #for test only
+      AssociatePublicIpAddress: false
       IamInstanceProfile: !Ref BucketAccessInstanceProfile
       ImageId: ami-06d51e91cea0dac8d      
       InstanceMonitoring: false #5 min metrics should be good enough and is free.
@@ -284,7 +284,7 @@ Resources:
               apt-get install apache2 -y
               systemctl start apache2.service
               cd /var/www/html
-              aws s3 cp s3://vivek.tech.hawp/site.zip .
+              aws s3 cp s3://vivek.tech.hawp/site.zip . #TODO: Make parameter store
               unzip -o site.zip
               UUID=$(cat /proc/sys/kernel/random/uuid)
               echo "<p>You are on server $UUID</p>" >> index.html
@@ -300,8 +300,8 @@ Resources:
         - !Select [ 0, !GetAZs '' ] #TODO: Get from parameters or elsewhere??
         - !Select [ 1, !GetAZs '' ]
       VPCZoneIdentifier:
-        - !Ref PublicSubnetA
-        - !Ref PublicSubnetB
+        - !Ref PrivateSubnetA
+        - !Ref PrivateSubnetB
       LaunchConfigurationName: !Ref WebAppServerLaunchConfig
       MaxSize: '4'
       MinSize: '2'
@@ -358,12 +358,9 @@ Resources:
       LoadBalancerArn: !Ref WebAppLoadBalancer
 
 
-#TODO: LoadBalancer listener
-
-#TODO: Move webservers to private subnets and test. 
  
 #TODO: Allow remote access to webservers via bastion host or SSM
-
+#TODO: go through script and add comments for future reference
 
   
   
