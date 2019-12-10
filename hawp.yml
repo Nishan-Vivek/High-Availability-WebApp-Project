@@ -303,14 +303,63 @@ Resources:
         - !Ref PublicSubnetA
         - !Ref PublicSubnetB
       LaunchConfigurationName: !Ref WebAppServerLaunchConfig
-      MaxSize: 4
-      MinSize: 2
+      MaxSize: '4'
+      MinSize: '2'
       Tags: #TODO: Set ASG tags
         - Key: keyname
           Value: value
           PropagateAtLaunch: True
+      TargetGroupARNs:
+        - !Ref WebAppTargetGroup
 
-#TODO: Deploy ELB and test
+  WebAppLoadBalancerSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub ${EnvironmentName}-WebAppLoadBalancerSG   
+      GroupDescription: Allow Loadbalancer port 80      
+      VpcId: !Ref VPC
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0      
+
+  WebAppTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+       HealthCheckPath: /
+       Port: 80
+       Protocol: HTTP
+       HealthCheckProtocol: HTTP
+       HealthCheckIntervalSeconds: 35
+       HealthCheckTimeoutSeconds: 30
+       HealthyThresholdCount: 2
+       UnhealthyThresholdCount: 2
+       VpcId: !Ref VPC
+
+  WebAppLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties: 
+      Name: !Sub ${EnvironmentName}-WebAppServerLB
+      SecurityGroups: 
+        - !Ref WebAppLoadBalancerSG
+      Subnets:
+        - !Ref PublicSubnetA
+        - !Ref PublicSubnetB
+
+  WebAppLoadBalancerListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref WebAppTargetGroup
+      Protocol: HTTP
+      Port: 80
+      LoadBalancerArn: !Ref WebAppLoadBalancer
+
+
+#TODO: LoadBalancer listener
+
 #TODO: Move webservers to private subnets and test. 
  
 #TODO: Allow remote access to webservers via bastion host or SSM
