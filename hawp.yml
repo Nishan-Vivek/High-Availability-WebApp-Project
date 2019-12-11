@@ -261,22 +261,16 @@ Resources:
         - IpProtocol: tcp
           FromPort: 80
           ToPort: 80
-          CidrIp: 0.0.0.0/0
-        - IpProtocol: tcp #TODO: Remove if using SSM or other access method in final release
-          FromPort: 22
-          ToPort: 22
-          CidrIp: 0.0.0.0/0       
+          CidrIp: 0.0.0.0/0        
 
   WebAppServerLaunchConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
-    Properties:
-      LaunchConfigurationName: !Sub ${EnvironmentName}-WebAppServerLaunchConfig
+    Properties:      
       AssociatePublicIpAddress: false
       IamInstanceProfile: !Ref InstanceProfile
       ImageId: ami-06d51e91cea0dac8d      #TODO: Make parameter.
       InstanceMonitoring: false #5 min metrics should be good enough and is free.
-      InstanceType: t3.medium
-      KeyName:  UdacityCLI
+      InstanceType: t3.medium      
       SecurityGroups:
         - !Ref WebAppServerSG
       UserData:
@@ -361,13 +355,11 @@ Resources:
       Port: 80
       LoadBalancerArn: !Ref WebAppLoadBalancer
 
-
- 
-#TODO: Allow remote access to webservers via bastion host or SSM
 #TODO: go through script and add comments for future reference
 #TODO: Ensure autoscaling scales/repairs
 #TODO: Switch ASG health check to loadbalancer
 #TODO: Look into instance updates
+#TODO: Look into instance volumes and mount points
 
 
 
