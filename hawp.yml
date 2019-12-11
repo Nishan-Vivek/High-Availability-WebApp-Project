@@ -4,6 +4,7 @@ Description: >
   This template deploys the following
     Network - VPC with a pair of public and private subnets across 2 Availability zones.
             - IGW, Pair of NAT gateways and default routes for the private and public subnets.
+            #TODO Description
 
 Parameters:
   EnvironmentName:
@@ -207,9 +208,10 @@ Resources:
           RouteTableId: !Ref PrivateRouteTableB
           SubnetId: !Ref PrivateSubnetB
 
-  BucketAccessRole:
+  InstanceRole:
     Type: AWS::IAM::Role
     Properties:
+      Description: IAM Role for environment instances.
       Path: "/"
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
@@ -220,6 +222,8 @@ Resources:
                   - "ec2.amazonaws.com"
               Action:
                 - "sts:AssumeRole"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
       Policies:
         - 
          PolicyName: !Sub ${EnvironmentName}-BucketAccessPolicy
@@ -238,12 +242,12 @@ Resources:
                   - "s3:DeleteObject"
                 Resource: "arn:aws:s3:::vivek.tech.hawp/*"
 
-  BucketAccessInstanceProfile:
+  InstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
       Path: /
       Roles:
-        - !Ref BucketAccessRole
+        - !Ref InstanceRole
   
         
 
@@ -268,8 +272,8 @@ Resources:
     Properties:
       LaunchConfigurationName: !Sub ${EnvironmentName}-WebAppServerLaunchConfig
       AssociatePublicIpAddress: false
-      IamInstanceProfile: !Ref BucketAccessInstanceProfile
-      ImageId: ami-06d51e91cea0dac8d      
+      IamInstanceProfile: !Ref InstanceProfile
+      ImageId: ami-06d51e91cea0dac8d      #TODO: Make parameter.
       InstanceMonitoring: false #5 min metrics should be good enough and is free.
       InstanceType: t3.medium
       KeyName:  UdacityCLI
@@ -305,9 +309,9 @@ Resources:
       LaunchConfigurationName: !Ref WebAppServerLaunchConfig
       MaxSize: '4'
       MinSize: '2'
-      Tags: #TODO: Set ASG tags
-        - Key: keyname
-          Value: value
+      Tags: 
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-WebAppServerASG
           PropagateAtLaunch: True
       TargetGroupARNs:
         - !Ref WebAppTargetGroup
@@ -361,6 +365,11 @@ Resources:
  
 #TODO: Allow remote access to webservers via bastion host or SSM
 #TODO: go through script and add comments for future reference
+#TODO: Ensure autoscaling scales/repairs
+#TODO: Switch ASG health check to loadbalancer
+#TODO: Look into instance updates
+
+
 
   
   
