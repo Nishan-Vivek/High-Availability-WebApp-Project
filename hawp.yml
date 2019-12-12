@@ -366,7 +366,24 @@ Resources:
       Port: 80
       LoadBalancerArn: !Ref WebAppLoadBalancer
 
+Outputs: 
+  
+  LoadBalancerURL:
+    Description: URL of the application loadbalancer.
+    Value:  !Sub
+        - http://${URL}
+        - {URL: !GetAtt WebAppLoadBalancer.DNSName}
+    Export:
+          Name: !Sub ${EnvironmentName}-LoadBalancerURL
+
+
+
+
+
+
+#TODO: Review Parameters
 #TODO: go through script and add comments for future reference
 #TODO: Switch ASG health check to loadbalancer
 #TODO: Look into instance updates
 #TODO: Look into instance volumes and mount points
+#TODO:  output exports of the CloudFormation script should be the public URL of the LoadBalancer. add http:// in front of the load balancer DNS Name
