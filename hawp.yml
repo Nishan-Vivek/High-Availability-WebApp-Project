@@ -9,7 +9,11 @@ Description: >
 Parameters:
   EnvironmentName:
         Description: An environment name that will be prefixed to resource names
-        Type: String
+        Type: String  
+
+  SourceBucketName:
+    Description: The S3 bucket that contains the application source files.
+    Type: String    
 
   VpcCIDR: 
       Description: Please enter the IP range (CIDR notation) for this VPC
@@ -233,23 +237,21 @@ Resources:
               - 
                 Effect: "Allow"
                 Action: "s3:ListBucket"
-                Resource: "arn:aws:s3:::vivek.tech.hawp"
+                Resource: !Sub "arn:aws:s3:::${SourceBucketName}"
               - 
                 Effect: "Allow"
                 Action: 
                   - "s3:PutObject"
                   - "s3:GetObject"
                   - "s3:DeleteObject"
-                Resource: "arn:aws:s3:::vivek.tech.hawp/*"
+                Resource: !Sub "arn:aws:s3:::${SourceBucketName}/*"
 
   InstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
       Path: /
       Roles:
-        - !Ref InstanceRole
-  
-        
+        - !Ref InstanceRole        
 
   WebAppServerSG:
     Type: AWS::EC2::SecurityGroup
@@ -282,10 +284,11 @@ Resources:
               apt-get install apache2 -y
               systemctl start apache2.service
               cd /var/www/html
-              aws s3 cp s3://vivek.tech.hawp/site.zip . #TODO: Make parameter store
+              aws s3 cp s3://${SourceBucketName}/site.zip .
               unzip -o site.zip
               UUID=$(cat /proc/sys/kernel/random/uuid)
               echo "<p>You are on server $UUID</p>" >> index.html
+            
       BlockDeviceMappings:
         - DeviceName: "/dev/sdk"
           Ebs:

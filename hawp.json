@@ -4,6 +4,10 @@
         "ParameterValue": "HAWP"
     },
     {
+        "ParameterKey": "SourceBucketName",
+        "ParameterValue": "vivek.tech.hawp"
+    },
+    {
         "ParameterKey": "VpcCIDR",
         "ParameterValue": "10.1.0.0/16"
     },
