@@ -261,7 +261,7 @@ Resources:
         - IpProtocol: tcp
           FromPort: 80
           ToPort: 80
-          CidrIp: 0.0.0.0/0        
+          SourceSecurityGroupId: !Ref WebAppLoadBalancerSG               
 
   WebAppServerLaunchConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
@@ -270,7 +270,7 @@ Resources:
       IamInstanceProfile: !Ref InstanceProfile
       ImageId: ami-06d51e91cea0dac8d      #TODO: Make parameter.
       InstanceMonitoring: false #5 min metrics should be good enough and is free.
-      InstanceType: t3.medium      
+      InstanceType: t3.medium 
       SecurityGroups:
         - !Ref WebAppServerSG
       UserData:
@@ -294,6 +294,8 @@ Resources:
   WebAppServerASG:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
+      HealthCheckType: ELB
+      HealthCheckGracePeriod: 100 #TODO: make param
       AvailabilityZones: 
         - !Select [ 0, !GetAZs '' ] #TODO: Get from parameters or elsewhere??
         - !Select [ 1, !GetAZs '' ]
@@ -302,7 +304,7 @@ Resources:
         - !Ref PrivateSubnetB
       LaunchConfigurationName: !Ref WebAppServerLaunchConfig
       MaxSize: '4'
-      MinSize: '2'
+      MinSize: '4'
       Tags: 
         - Key: Name
           Value: !Sub ${EnvironmentName}-WebAppServerASG
@@ -321,6 +323,15 @@ Resources:
           FromPort: 80
           ToPort: 80
           CidrIp: 0.0.0.0/0      
+
+  WebAppLoadBalancerSecurityGroupEgress:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties: 
+      GroupId: !Ref WebAppLoadBalancerSG
+      IpProtocol: tcp
+      FromPort: 80
+      ToPort: 80
+      DestinationSecurityGroupId: !Ref WebAppServerSG      
 
   WebAppTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -356,12 +367,6 @@ Resources:
       LoadBalancerArn: !Ref WebAppLoadBalancer
 
 #TODO: go through script and add comments for future reference
-#TODO: Ensure autoscaling scales/repairs
 #TODO: Switch ASG health check to loadbalancer
 #TODO: Look into instance updates
 #TODO: Look into instance volumes and mount points
-
-
-
-  
-  
