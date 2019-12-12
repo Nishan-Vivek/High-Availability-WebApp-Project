@@ -376,7 +376,65 @@ Outputs:
     Export:
           Name: !Sub ${EnvironmentName}-LoadBalancerURL
 
+  VPC: 
+    Description: A reference to the created VPC
+    Value: !Ref VPC
+    Export:
+      Name: !Sub ${EnvironmentName}-VPCID
 
+  VPCPublicRouteTable:
+      Description: Public Routing
+      Value: !Ref PublicRouteTable
+      Export:
+        Name: !Sub ${EnvironmentName}-PUB-RT
+
+  VPCPrivateRouteTable1:
+      Description: Private Routing AZ1
+      Value: !Ref PrivateRouteTableA
+      Export:
+        Name: !Sub ${EnvironmentName}-PRIA-RT
+
+  VPCPrivateRouteTable2:
+      Description: Private Routing AZ2
+      Value: !Ref PrivateRouteTableB
+      Export:
+        Name: !Sub ${EnvironmentName}-PRIB-RT
+
+  PublicSubnets:
+      Description: A list of the public subnets
+      Value: !Join [ ",", [ !Ref PublicSubnetA, !Ref PublicSubnetB ]]
+      Export:
+        Name: !Sub ${EnvironmentName}-PUB-NETS
+
+  PrivateSubnets:
+      Description: A list of the private subnets
+      Value: !Join [ ",", [ !Ref PrivateSubnetA, !Ref PrivateSubnetB ]]
+      Export:
+        Name: !Sub ${EnvironmentName}-PRIV-NETS
+
+  PublicSubnet1:
+      Description: A reference to the public subnet in the 1st Availability Zone
+      Value: !Ref PublicSubnetA
+      Export:
+        Name: !Sub ${EnvironmentName}-PUBA-SN
+
+  PublicSubnet2: 
+      Description: A reference to the public subnet in the 2nd Availability Zone
+      Value: !Ref PublicSubnetB
+      Export:
+        Name: !Sub ${EnvironmentName}-PUBB-SN
+
+  PrivateSubnet1:
+      Description: A reference to the private subnet in the 1st Availability Zone
+      Value: !Ref PrivateSubnetA
+      Export:
+        Name: !Sub ${EnvironmentName}-PRIA-SN
+
+  PrivateSubnet2: 
+      Description: A reference to the private subnet in the 2nd Availability Zone
+      Value: !Ref PrivateSubnetB
+      Export:
+        Name: !Sub ${EnvironmentName}-PRIB-SN
 
 
 
@@ -386,4 +444,3 @@ Outputs:
 #TODO: Switch ASG health check to loadbalancer
 #TODO: Look into instance updates
 #TODO: Look into instance volumes and mount points
-#TODO:  output exports of the CloudFormation script should be the public URL of the LoadBalancer. add http:// in front of the load balancer DNS Name
