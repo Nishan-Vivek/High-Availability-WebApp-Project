@@ -4,8 +4,8 @@
         "ParameterValue": "HAWP"
     },
     {
-        "ParameterKey": "SourceBucketName",
-        "ParameterValue": "vivek.tech.hawp"
+        "ParameterKey": "SourceBucketNameSSMparameter",
+        "ParameterValue": "HAWP-Source"
     },
     {
         "ParameterKey": "VpcCIDR",

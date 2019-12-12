@@ -8,7 +8,7 @@ Description: >
             - External facing load balancer that targets the auto scaling group
             - The instances can be accessed and managed via AWS Systems Manager
             - Necessary  routes, security groups, roles and permissions.
-            - The s3 bucket that contains the application to be deployed is provided as a parameter.
+            - The s3 bucket that contains the application to be deployed is provided as an SSM parameter.
             - The user running the script must have permissions to the s3 bucket and it must be in the account.
             - The source zip is expected to be name /site.zip
             
@@ -24,9 +24,9 @@ Parameters:
         Description: An environment name that will be prefixed to resource names
         Type: String  
 
-  SourceBucketName:
-    Description: The S3 bucket that contains the application source files.
-    Type: String    
+  SourceBucketNameSSMparameter:
+    Description: The SSM Parameter with the S3 bucket name that contains the application source files.
+    Type: AWS::SSM::Parameter::Value<String>   
 
 # Network parameters
   VpcCIDR: 
@@ -281,14 +281,14 @@ Resources:
               - 
                 Effect: "Allow"
                 Action: "s3:ListBucket"
-                Resource: !Sub "arn:aws:s3:::${SourceBucketName}"
+                Resource: !Sub "arn:aws:s3:::${SourceBucketNameSSMparameter}"
               - 
                 Effect: "Allow"
                 Action: 
                   - "s3:PutObject"
                   - "s3:GetObject"
                   - "s3:DeleteObject"
-                Resource: !Sub "arn:aws:s3:::${SourceBucketName}/*"
+                Resource: !Sub "arn:aws:s3:::${SourceBucketNameSSMparameter}/*"
 
   InstanceProfile:
     Type: AWS::IAM::InstanceProfile
@@ -328,7 +328,7 @@ Resources:
               apt-get install apache2 -y
               systemctl start apache2.service
               cd /var/www/html
-              aws s3 cp s3://${SourceBucketName}/site.zip .
+              aws s3 cp s3://${SourceBucketNameSSMparameter}/site.zip .
               unzip -o site.zip
               UUID=$(cat /proc/sys/kernel/random/uuid)
               echo "<p>You are on server $UUID</p>" >> index.html #UUID for each instance to verify load balancing
@@ -338,36 +338,36 @@ Resources:
           Ebs:
             VolumeSize: 10 # As specified in requirements
 
+  WebAppServerASG:
+      Type: AWS::AutoScaling::AutoScalingGroup
+      Properties:
+        HealthCheckType: ELB
+        HealthCheckGracePeriod: 150 # Test and modify the grace period if changes made to instances/application
+        AvailabilityZones: 
+          - !Select [ 0, !GetAZs '' ]
+          - !Select [ 1, !GetAZs '' ]
+        VPCZoneIdentifier:
+          - !Ref PrivateSubnetA
+          - !Ref PrivateSubnetB
+        LaunchConfigurationName: !Ref WebAppServerLaunchConfig
+        MaxSize: '4' 
+        MinSize: '4'  # As specified in requirements
+        Tags: 
+          - Key: Name
+            Value: !Sub ${EnvironmentName}-WebAppServerASG
+            PropagateAtLaunch: True
+        TargetGroupARNs:
+          - !Ref WebAppTargetGroup
+
 #============================================================
 # Loadbalancer Configuration
 #============================================================
-
-  WebAppServerASG:
-    Type: AWS::AutoScaling::AutoScalingGroup
-    Properties:
-      HealthCheckType: ELB
-      HealthCheckGracePeriod: 150 # Test and modify the grace period if changes made to instances/application
-      AvailabilityZones: 
-        - !Select [ 0, !GetAZs '' ]
-        - !Select [ 1, !GetAZs '' ]
-      VPCZoneIdentifier:
-        - !Ref PrivateSubnetA
-        - !Ref PrivateSubnetB
-      LaunchConfigurationName: !Ref WebAppServerLaunchConfig
-      MaxSize: '4' 
-      MinSize: '4'  # As specified in requirements
-      Tags: 
-        - Key: Name
-          Value: !Sub ${EnvironmentName}-WebAppServerASG
-          PropagateAtLaunch: True
-      TargetGroupARNs:
-        - !Ref WebAppTargetGroup
+  
 
   WebAppLoadBalancerSG:
     Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupName: !Sub ${EnvironmentName}-WebAppLoadBalancerSG   
-      GroupDescription: Allow Loadbalancer on specified port      
+    Properties:      
+      GroupDescription: Allow Loadbalancer on specified      
       VpcId: !Ref VPC
       SecurityGroupIngress: 
         - IpProtocol: tcp
