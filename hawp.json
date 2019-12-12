@@ -26,5 +26,17 @@
     {
         "ParameterKey": "PrivateSubnetBCIDR",
         "ParameterValue": "10.1.3.0/24"
+    },
+    {
+        "ParameterKey": "ApplicationPort",
+        "ParameterValue": "80"
+    },
+    {
+        "ParameterKey": "WebApplicationServerAMI",
+        "ParameterValue": "ami-06d51e91cea0dac8d"
+    },
+    {
+        "ParameterKey": "WebApplicationServerInstanceType",
+        "ParameterValue": "t3.medium"
     }
 ]

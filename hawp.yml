@@ -40,6 +40,20 @@ Parameters:
       Type: String
       Default: 10.0.3.0/24
 
+  ApplicationPort:
+      Description: The port number used by the application. Both for the external facing load balancer and internal application servers.
+      Type: String
+      Default: 80
+
+  WebApplicationServerAMI:
+      Description: AMI to be used for the web application servers
+      Type: String
+
+  WebApplicationServerInstanceType:
+    Description: Instance type to be used for the web application servers
+    Type: String
+    Default: t2.micro
+
 Resources:
   VPC:
     Type: AWS::EC2::VPC
@@ -227,7 +241,7 @@ Resources:
               Action:
                 - "sts:AssumeRole"
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore # For SSM ans session manager
       Policies:
         - 
          PolicyName: !Sub ${EnvironmentName}-BucketAccessPolicy
@@ -261,8 +275,8 @@ Resources:
       VpcId: !Ref VPC
       SecurityGroupIngress:
         - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
+          FromPort: !Ref ApplicationPort
+          ToPort: !Ref ApplicationPort
           SourceSecurityGroupId: !Ref WebAppLoadBalancerSG               
 
   WebAppServerLaunchConfig:
@@ -270,12 +284,12 @@ Resources:
     Properties:      
       AssociatePublicIpAddress: false
       IamInstanceProfile: !Ref InstanceProfile
-      ImageId: ami-06d51e91cea0dac8d      #TODO: Make parameter.
-      InstanceMonitoring: false #5 min metrics should be good enough and is free.
-      InstanceType: t3.medium 
+      ImageId: !Ref WebApplicationServerAMI
+      InstanceMonitoring: false 
+      InstanceType: !Ref WebApplicationServerInstanceType
       SecurityGroups:
         - !Ref WebAppServerSG
-      UserData:
+      UserData: 
         Fn::Base64:
            !Sub |
               #!/bin/bash -xe
@@ -290,7 +304,7 @@ Resources:
               echo "<p>You are on server $UUID</p>" >> index.html
             
       BlockDeviceMappings:
-        - DeviceName: "/dev/sdk"
+        - DeviceName: "/dev/sda1"
           Ebs:
             VolumeSize: 10
 
@@ -298,16 +312,16 @@ Resources:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       HealthCheckType: ELB
-      HealthCheckGracePeriod: 100 #TODO: make param
+      HealthCheckGracePeriod: 150 
       AvailabilityZones: 
-        - !Select [ 0, !GetAZs '' ] #TODO: Get from parameters or elsewhere??
+        - !Select [ 0, !GetAZs '' ]
         - !Select [ 1, !GetAZs '' ]
       VPCZoneIdentifier:
         - !Ref PrivateSubnetA
         - !Ref PrivateSubnetB
       LaunchConfigurationName: !Ref WebAppServerLaunchConfig
-      MaxSize: '4'
-      MinSize: '4'
+      MaxSize: '4' 
+      MinSize: '4' 
       Tags: 
         - Key: Name
           Value: !Sub ${EnvironmentName}-WebAppServerASG
@@ -323,24 +337,24 @@ Resources:
       VpcId: !Ref VPC
       SecurityGroupIngress: 
         - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
+          FromPort: !Ref ApplicationPort
+          ToPort: !Ref ApplicationPort
           CidrIp: 0.0.0.0/0      
 
   WebAppLoadBalancerSecurityGroupEgress:
     Type: AWS::EC2::SecurityGroupEgress
     Properties: 
       GroupId: !Ref WebAppLoadBalancerSG
-      IpProtocol: tcp
-      FromPort: 80
-      ToPort: 80
+      IpProtocol: tcp 
+      FromPort: !Ref ApplicationPort
+      ToPort: !Ref ApplicationPort
       DestinationSecurityGroupId: !Ref WebAppServerSG      
 
   WebAppTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
        HealthCheckPath: /
-       Port: 80
+       Port: !Ref ApplicationPort
        Protocol: HTTP
        HealthCheckProtocol: HTTP
        HealthCheckIntervalSeconds: 35
@@ -366,7 +380,7 @@ Resources:
         - Type: forward
           TargetGroupArn: !Ref WebAppTargetGroup
       Protocol: HTTP
-      Port: 80
+      Port: !Ref ApplicationPort
       LoadBalancerArn: !Ref WebAppLoadBalancer
 
 Outputs: 
@@ -442,8 +456,5 @@ Outputs:
 
 
 
-#TODO: Review Parameters
+
 #TODO: go through script and add comments for future reference
-#TODO: Switch ASG health check to loadbalancer
-#TODO: Look into instance updates
-#TODO: Look into instance volumes and mount points
