@@ -1,12 +1,25 @@
 Description: >
   Nishan Vivekanandan / For Udacity Cloud DevOps Project 2
 
-  This template deploys the following
-    Network - VPC with a pair of public and private subnets across 2 Availability zones.
-            - IGW, Pair of NAT gateways and default routes for the private and public subnets.
-            #TODO Description
+  This template deploys the following:
+            - VPC with a pair of public and private subnets across 2 Availability zones. (Zones A & B of the selected region)
+            - IGW, Pair of NAT gateways and default routes for the private and public subnets. 
+            - Auto scaling group configured with 4 web app server instances spread over the 2 priv subnets.
+            - External facing load balancer that targets the auto scaling group
+            - The instances can be accessed and managed via AWS Systems Manager
+            - Necessary  routes, security groups, roles and permissions.
+            - The s3 bucket that contains the application to be deployed is provided as a parameter.
+            - The user running the script must have permissions to the s3 bucket and it must be in the account.
+            - The source zip is expected to be name /site.zip
+            
+
+#============================================================
+# Parameters
+#============================================================
 
 Parameters:
+
+# General Parameters
   EnvironmentName:
         Description: An environment name that will be prefixed to resource names
         Type: String  
@@ -15,6 +28,7 @@ Parameters:
     Description: The S3 bucket that contains the application source files.
     Type: String    
 
+# Network parameters
   VpcCIDR: 
       Description: Please enter the IP range (CIDR notation) for this VPC
       Type: String
@@ -40,6 +54,8 @@ Parameters:
       Type: String
       Default: 10.0.3.0/24
 
+ 
+ # Instance and application parameters
   ApplicationPort:
       Description: The port number used by the application. Both for the external facing load balancer and internal application servers.
       Type: String
@@ -52,7 +68,15 @@ Parameters:
   WebApplicationServerInstanceType:
     Description: Instance type to be used for the web application servers
     Type: String
-    Default: t2.micro
+    Default: t3.medium
+
+#============================================================
+# Resources
+#============================================================
+
+#============================================================
+# Network Configuration
+#============================================================
 
 Resources:
   VPC:
@@ -226,6 +250,12 @@ Resources:
           RouteTableId: !Ref PrivateRouteTableB
           SubnetId: !Ref PrivateSubnetB
 
+
+#============================================================
+# Autoscaling Group and Instance Configuration
+#============================================================
+
+#Instance role configured to allow access to source s3 bucket and SSM agent for management
   InstanceRole:
     Type: AWS::IAM::Role
     Properties:
@@ -241,10 +271,10 @@ Resources:
               Action:
                 - "sts:AssumeRole"
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore # For SSM ans session manager
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore # For SSM session manager
       Policies:
         - 
-         PolicyName: !Sub ${EnvironmentName}-BucketAccessPolicy
+         PolicyName: !Sub ${EnvironmentName}-BucketAccessPolicy #Inline policy for source s3 bucket passed in as parameter
          PolicyDocument:
            Version: "2012-10-17"
            Statement:
@@ -301,18 +331,22 @@ Resources:
               aws s3 cp s3://${SourceBucketName}/site.zip .
               unzip -o site.zip
               UUID=$(cat /proc/sys/kernel/random/uuid)
-              echo "<p>You are on server $UUID</p>" >> index.html
+              echo "<p>You are on server $UUID</p>" >> index.html #UUID for each instance to verify load balancing
             
       BlockDeviceMappings:
         - DeviceName: "/dev/sda1"
           Ebs:
-            VolumeSize: 10
+            VolumeSize: 10 # As specified in requirements
+
+#============================================================
+# Loadbalancer Configuration
+#============================================================
 
   WebAppServerASG:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       HealthCheckType: ELB
-      HealthCheckGracePeriod: 150 
+      HealthCheckGracePeriod: 150 # Test and modify the grace period if changes made to instances/application
       AvailabilityZones: 
         - !Select [ 0, !GetAZs '' ]
         - !Select [ 1, !GetAZs '' ]
@@ -321,7 +355,7 @@ Resources:
         - !Ref PrivateSubnetB
       LaunchConfigurationName: !Ref WebAppServerLaunchConfig
       MaxSize: '4' 
-      MinSize: '4' 
+      MinSize: '4'  # As specified in requirements
       Tags: 
         - Key: Name
           Value: !Sub ${EnvironmentName}-WebAppServerASG
@@ -333,7 +367,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupName: !Sub ${EnvironmentName}-WebAppLoadBalancerSG   
-      GroupDescription: Allow Loadbalancer port 80      
+      GroupDescription: Allow Loadbalancer on specified port      
       VpcId: !Ref VPC
       SecurityGroupIngress: 
         - IpProtocol: tcp
@@ -382,6 +416,10 @@ Resources:
       Protocol: HTTP
       Port: !Ref ApplicationPort
       LoadBalancerArn: !Ref WebAppLoadBalancer
+
+#============================================================
+# Outputs
+#============================================================
 
 Outputs: 
   
@@ -452,9 +490,3 @@ Outputs:
       Value: !Ref PrivateSubnetB
       Export:
         Name: !Sub ${EnvironmentName}-PRIB-SN
-
-
-
-
-
-#TODO: go through script and add comments for future reference
