@@ -126,7 +126,3 @@ Last thing: Remember to delete your **CloudFormation** stack when you're done to
 |---|---|---|
 |Output   |Any values in the output section are a bonus   | :heavy_check_mark:  |
 |Bastion Host   | Any resource of type AWS::EC2::Instance, optional, but nice to have.  | :heavy_check_mark: - Using AWS System Manager instead  |
-
-#### Extras
-- Students can use AWS Parameter Store to save sensitive data, such as credentials to showcase their attention to security.
-- Students can use CloudWatch Alarms and CloudWatch custom metrics to showcase their performance and monitoring skills.
