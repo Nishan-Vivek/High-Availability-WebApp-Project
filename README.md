@@ -26,6 +26,7 @@ Specifications as per Udacity course requirements can be found [here](./document
 Clone or download the project GIT repo to your AWS CLI workstation. 
 
 ***In the Repo***
+
 hawp.yml - Main CloudFormation Template  
 hawp.json - Parameters file  
 create.sh - Helper script to create stack  
