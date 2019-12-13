@@ -2,9 +2,9 @@
 
 Project 2 - Deploy a high-availability web app using CloudFormation
 
-## Project Requirements
+## Project Specifications
 
-Project requirements as specified by Udacity. 
+Project specifications as specified by Udacity. 
 
 ### Scenario
 

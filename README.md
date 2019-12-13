@@ -1,21 +1,25 @@
 # High-Availability-WebApp-Project
-Deploy a high-availability web app using CloudFormation
 
-## Requirements
+An AWS Cloudformation script that deploys the infrastructure for a high availability web application as specified by [Udacity](https://www,udacity.com) for Cloud DevOps Engineer - project 2. 
 
-Requirements as per Udacity course specifications can be found [here](./documentation/requirements.md).
+## Specifications
+
+Specifications as per Udacity course requirements can be found [here](./documentation/project_specifications.md).
 
 ## Infrastructure Diagram
 
 ![Infrastructure Diagram](./documentation/High-Availability-WebApp-Project.svg)
 
-Diagram: https://www.lucidchart.com/documents/view/d07c38f9-42f6-4f89-90c2-3f6b567dfd34/0_0
+## Prerequisites & Assumptions
 
-TODO: Diagram - 2nd layer for additional elements
+- AWS account and appropriate credentials to deploy the script in its entirety. 
+    - This script was developed and tested with the AdministratorAccess policy
+- The AWS Cli installed and configured for your AWS account. 
+    - This script was developed and tested with aws-cli v1.16.290.
 
 
 
-TODO: Assumptions and Requirments  
+
 TODO: Deployment Instructions  
 TODO: Usage Instructions  
 TODO: Access instructions  
