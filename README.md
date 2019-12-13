@@ -46,9 +46,9 @@ The create.sh and update.sh helper scripts provided in the repo target AWS Regio
 
 Deploy the CloudFormation stack by running the create.sh helper script from the project directory. 
 
-```./create.sh <b>MyStackName</b> hawp.yml hawp.json```
+```./create.sh MyStackName hawp.yml hawp.json```
 
-Replace `<b>MyStackName</b>` as desired.
+Replace `MyStackName` as desired.
 
 TODO: Deployment Instructions  
 TODO: Usage Instructions  
