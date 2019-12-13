@@ -26,13 +26,13 @@ Specifications as per Udacity course requirements can be found [here](./document
 Clone or download the project GIT repo to your AWS CLI workstation. 
 
 ***In the Repo***
-hawp.yml - Main CloudFormation Template
-hawp.json - Parameters file
-create.sh - Helper script to create stack.
-update.sh - Helper script to update stack.
-README.md - This document
-/documentation - Additional documents and diagrams
-/website - Source files for the web app
+hawp.yml - Main CloudFormation Template  
+hawp.json - Parameters file  
+create.sh - Helper script to create stack  
+update.sh - Helper script to update stack  
+README.md - This document  
+/documentation - Additional documents and diagrams  
+/website - Source files for the web app  
 
 ### Setup S3 Bucket and Parameter Store
 
