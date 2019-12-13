@@ -1,6 +1,6 @@
 # High-Availability-WebApp-Project
 
-An AWS CloudFormation script that deploys the infrastructure for a high availability web application as specified by [Udacity](https://www,udacity.com) for Cloud DevOps Engineer - project 2. 
+An AWS CloudFormation template that deploys the infrastructure for a high availability web application as specified by [Udacity](https://www,udacity.com) for Cloud DevOps Engineer - project 2. 
 
 ## Specifications
 
