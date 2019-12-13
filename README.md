@@ -84,7 +84,7 @@ The environment has been configured to use AWS Systems Manager - Sessions Manage
 
 In the AWS Management console navigate to the AWS Systems Manager service page. On the left of the page look for "Instances & Nodes" and click on "Managed Instances". You will see a list of the instances launched by the environment. Select the instance you wish to start a session with. Click "Actions" and "Start Session". You will be taken to a terminal emulation window and can issue commands as desired. 
 
-*** AWS CLI ***
+***AWS CLI***
 
 You can also start a session from the AWS CLI after installing the "Session Manager Plugin for the AWS CLI". Instructions on installing and using the plug-in can be found here: https://docs.aws.amazon.com/cli/latest/reference/ssm/start-session.html
 
