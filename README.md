@@ -16,7 +16,7 @@ Specifications as per Udacity course requirements can be found [here](./document
     - This script was developed and tested with the AdministratorAccess policy
 - The AWS Cli installed and configured for your AWS account. 
     - This script was developed and tested with aws-cli v1.16.290.
-- The setup scripts target AWS regions us-west2 by default and it is the recommendation region for deployment testing. Other regions may not have all the required AWS features.
+- The setup scripts target AWS regions us-west2 by default and it is the recommended region for deployment and testing. Other regions may not have all the required AWS services.
 - A BASH terminal to use the provided helper scripts. If using windows simply run the aws cli commands manually. 
 
 ## Usage Instructions
