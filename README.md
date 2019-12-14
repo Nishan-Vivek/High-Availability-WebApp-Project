@@ -79,7 +79,7 @@ If you refresh the page several times you should notice the last line change. Ea
 
 The environment has been configured to use AWS Systems Manager - Sessions Manager to allow remote terminal access to the webapp Server instances for troubleshooting/diagnosing. This eliminates the need of a bastion host and provides a host of other benefits of being an AWS managed service. 
 
-##### Starting an session with an instance
+##### Starting a session with an instance
 
 ***AWS Console***
 
